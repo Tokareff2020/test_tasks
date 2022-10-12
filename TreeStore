@@ -1,0 +1,62 @@
+from typing import Literal
+
+
+data_list = [{'id': 1, 'parent': 'root'},
+               {'id': 2, 'parent': 1, 'type': 'test'},
+               {'id': 3, 'parent': 1, 'type': 'test'},
+               {'id': 4, 'parent': 2, 'type': 'test'},
+               {'id': 5, 'parent': 2, 'type': 'test'},
+               {'id': 6, 'parent': 2, 'type': 'test'},
+               {'id': 7, 'parent': 4, 'type': None},
+               {'id': 8, 'parent': 4, 'type': None}]
+
+
+class TreeStore:
+    id: int
+    parent: int
+    type: Literal['test', None]
+    list_data: list[dict]
+
+    def __init__(self, list_data):
+        try:
+            self.__id = [i['id'] for i in list_data]
+            self.__parent = [i['parent'] for i in list_data]
+            self.__type = [i['type'] for i in list_data]
+        except KeyError as e:
+            print(f"The element was passed without a parameter {e}")
+        self.__list_data = list_data
+
+    def get_all(self):
+        return self.__list_data
+
+    def get_item(self, item_id):
+        """ Ожидается, что id соответсвует позиции + 1 в изначальном списке """
+        return {'id': item_id,
+                'parent': self.__list_data[item_id-1]['parent'],
+                'type': self.__list_data[item_id-1]['type']
+        }
+
+    def get_children(self, item_id):
+        return [x for x in self.__list_data if x['parent'] == item_id]
+
+    def get_parents(self, item_id):
+        """ Ожидается, что id соответсвует позиции + 1 в изначальном списке """
+
+        list_parents = []
+        while True:
+            if self.__list_data[item_id-1]['parent'] != 'root':
+                list_parents.append(self.__list_data[item_id-1])
+                item_id = self.__list_data[item_id-1]['parent']
+            else:
+                list_parents.append(self.__list_data[item_id - 1])
+                break
+        return list_parents
+
+
+ts = TreeStore(data_list)
+print(ts.get_all())
+print(ts.get_item(5))
+print(ts.get_children(2))
+print(ts.get_parents(8))
+
+
